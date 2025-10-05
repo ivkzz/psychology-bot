@@ -18,11 +18,6 @@
   - [ ] `lucide-react` - иконки
   - [ ] `sonner` - toast уведомления
 
-- [ ] Настроить shadcn/ui
-  ```bash
-  npx shadcn-ui@latest init
-  ```
-
 - [ ] Создать файл `.env.local`
   ```env
   NEXT_PUBLIC_API_URL=http://localhost:8000
