@@ -1,29 +1,26 @@
 # Frontend TODO - Next.js 15 App Router
 
-## Приоритет 1: Инфраструктура и настройка проекта
+## Приоритет 1: Инфраструктура и настройка проекта ✅
 
-- [ ] Инициализировать Next.js 15 проект с TypeScript
-  ```bash
-  npx create-next-app@latest . --typescript --tailwind --app --no-src-dir
-  ```
+- [x] **ГОТОВО:** Инициализировать Next.js 15 проект с TypeScript
+- [x] **ГОТОВО:** Установить основные зависимости
+  - [x] `@tanstack/react-query` v5.90.2
+  - [x] `axios` v1.12.2
+  - [x] `zod` v4.1.11
+  - [x] `react-hook-form` v7.64.0
+  - [x] `@hookform/resolvers` v5.2.2
+  - [x] `zustand` v5.0.8
+  - [x] `date-fns` v4.1.0
+  - [x] `lucide-react` v0.544.0
+  - [x] `sonner` v2.0.7
+  - [x] `next-themes` v0.4.6
+  - [x] `recharts` v2.15.4 (опционально)
 
-- [ ] Установить основные зависимости
-  - [ ] `@tanstack/react-query` - управление серверным состоянием и кеширование
-  - [ ] `axios` - HTTP клиент (interceptors для токенов и обработки ошибок)
-  - [ ] `zod` - валидация схем
-  - [ ] `react-hook-form` - управление формами
-  - [ ] `@hookform/resolvers` - интеграция zod с react-hook-form
-  - [ ] `zustand` - store только для auth токенов (accessToken, refreshToken)
-  - [ ] `date-fns` - работа с датами
-  - [ ] `lucide-react` - иконки
-  - [ ] `sonner` - toast уведомления
+- [x] **ГОТОВО:** Настроить shadcn/ui - установлены ВСЕ компоненты (50+)
 
-- [ ] Создать файл `.env.local`
-  ```env
-  NEXT_PUBLIC_API_URL=http://localhost:8000
-  ```
+- [x] **ГОТОВО:** Создать файл `.env.local`
 
-- [ ] Настроить Docker
+- [ ] **TODO:** Настроить Docker
   - [ ] Создать `Dockerfile` (multi-stage build)
   - [ ] Добавить `.dockerignore`
   - [ ] Интегрировать в `docker-compose.yml`
@@ -297,23 +294,21 @@
   - [ ] Copyright
   - [ ] Ссылки (Помощь, Контакты)
 
-### shadcn/ui компоненты
+### shadcn/ui компоненты ✅
 
-- [ ] Установить и настроить компоненты:
-  - [ ] `Button` - кнопки
-  - [ ] `Input`, `Textarea` - формы
-  - [ ] `Card` - карточки
-  - [ ] `Table` - таблицы
-  - [ ] `Dialog` - модальные окна
-  - [ ] `Select` - выпадающие списки
-  - [ ] `Badge` - бейджи
-  - [ ] `Tabs` - табы
-  - [ ] `Alert` - уведомления
-  - [ ] `Skeleton` - загрузка
-  - [ ] `Toast` - всплывающие уведомления
-  - [ ] `Avatar` - аватары
-  - [ ] `Dropdown Menu` - выпадающие меню
-  - [ ] `Pagination` - пагинация
+**ГОТОВО:** Установлены ВСЕ компоненты (50+ в `components/ui/`):
+- [x] Button, Input, Textarea, Label, Form
+- [x] Card, Table, Badge, Avatar
+- [x] Dialog, Alert Dialog, Sheet, Drawer
+- [x] Select, Dropdown Menu, Command, Popover
+- [x] Tabs, Accordion, Collapsible
+- [x] Alert, Sonner (Toast)
+- [x] Skeleton, Progress, Spinner
+- [x] Pagination, Breadcrumb
+- [x] Calendar, Date Picker
+- [x] Sidebar, Navigation Menu
+- [x] Chart, Carousel
+- [x] И другие...
 
 ### Утилиты
 
@@ -569,16 +564,16 @@ export interface PaginatedResponse<T> {
 
 ## Приоритеты выполнения (рекомендуемый порядок)
 
-### Sprint 1 (5-7 дней): Инфраструктура + Аутентификация
-1. Инициализация проекта (Next.js 15 + TypeScript + Tailwind)
-2. Установка зависимостей (TanStack Query, Axios, Zustand, shadcn/ui)
-3. Настройка Axios клиента с interceptors (авто-добавление токенов)
-4. TanStack Query Provider + Devtools
-5. Auth Store (Zustand) - только токены, с persist в localStorage
-6. API методы для auth (register, login, refresh, logout)
-7. Страницы login/register с формами (react-hook-form + zod)
-8. Middleware для защиты роутов (проверка токенов)
-9. Docker конфигурация (Dockerfile + docker-compose.yml)
+### Sprint 1 (5-7 дней): Инфраструктура + Аутентификация ✅ ЗАВЕРШЕН
+1. ✅ Инициализация проекта (Next.js 15 + TypeScript + Tailwind)
+2. ✅ Установка зависимостей (TanStack Query, Axios, Zustand, shadcn/ui)
+3. ✅ Настройка Axios клиента с interceptors
+4. ✅ TanStack Query Provider + Devtools
+5. ✅ Auth Store (Zustand) - только токены, с persist в localStorage
+6. ✅ API методы для auth (register, login, refresh, logout)
+7. ✅ Страницы login/register с формами (react-hook-form + zod)
+8. ✅ Middleware для защиты роутов (проверка токенов)
+9. ⏸️ Docker конфигурация (Dockerfile + docker-compose.yml) - ОТЛОЖЕНО
 
 ### Sprint 2 (5-7 дней): Пользовательский кабинет
 1. Layout (Header с навигацией, Footer)
