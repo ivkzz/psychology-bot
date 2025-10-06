@@ -22,7 +22,13 @@ async def assign_daily_task(
 ) -> AssignmentResponse:
     """
     Назначить ежедневное задание пользователю.
-    Если задание на сегодня уже существует, возвращает его.
+
+    Логика:
+    1. Проверяем, выполнил ли пользователь задание сегодня
+    2. Если выполнил - возвращаем 409 (уже выполнено)
+    3. Проверяем, есть ли PENDING задание на сегодня
+    4. Если нет - проверяем очередь pending заданий и назначаем на сегодня
+    5. Если нет pending - создаем новое случайное задание
 
     Args:
         db: Сессия базы данных
@@ -34,14 +40,34 @@ async def assign_daily_task(
         AssignmentResponse: Назначенное задание
 
     Raises:
-        HTTPException: Если не найдено подходящих заданий
+        HTTPException 409: Если пользователь уже выполнил задание сегодня
+        HTTPException 404: Если не найдено подходящих заданий
     """
-    # Проверяем, есть ли уже задание на сегодня
+    # Проверяем, выполнил ли пользователь задание сегодня
+    has_completed = await assignment_crud.has_completed_task_today(db, user_id)
+    if has_completed:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Вы уже выполнили задание на сегодня. Приходите завтра!"
+        )
+
+    # Проверяем, есть ли уже PENDING задание на сегодня
     today_assignment = await assignment_crud.get_today_assignment(db, user_id)
     if today_assignment:
         return AssignmentResponse.model_validate(today_assignment)
 
-    # Получаем случайное задание
+    # Проверяем очередь pending заданий
+    pending_assignment = await assignment_crud.get_next_pending_assignment(db, user_id)
+    if pending_assignment:
+        # Назначаем pending задание на сегодня
+        assigned = await assignment_crud.assign_pending_to_date(
+            db,
+            assignment_id=pending_assignment.id,
+            target_date=date.today()
+        )
+        return AssignmentResponse.model_validate(assigned)
+
+    # Нет pending заданий - создаем новое случайное
     task = await task_crud.get_random_task(db, category=category, difficulty=difficulty)
     if not task:
         raise HTTPException(
@@ -49,11 +75,12 @@ async def assign_daily_task(
             detail="Не найдено подходящих заданий"
         )
 
-    # Создаем назначение
+    # Создаем назначение на сегодня
     assignment = await assignment_crud.create_daily_assignment(
         db,
         user_id=user_id,
-        task_id=task.id
+        task_id=task.id,
+        assigned_date=date.today()
     )
 
     return AssignmentResponse.model_validate(assignment)

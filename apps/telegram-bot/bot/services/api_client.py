@@ -186,9 +186,31 @@ class BackendAPIClient:
             token: JWT токен пользователя
 
         Returns:
-            Dict с заданием на сегодня или None
+            Dict с заданием на сегодня, или dict с ключом 'already_completed', или None при ошибке
         """
-        return await self._make_request("GET", "/tasks/today", token=token)
+        url = f"{self.base_url}{self.api_prefix}/tasks/today"
+        headers = {"Authorization": f"Bearer {token}"}
+
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.get(url, headers=headers)
+
+                # Если 409 - пользователь уже выполнил задание
+                if response.status_code == 409:
+                    return {"already_completed": True, "detail": response.json().get("detail", "Вы уже выполнили задание на сегодня")}
+
+                response.raise_for_status()
+                return response.json()
+
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP error {e.response.status_code}: {e.response.text}")
+            return None
+        except httpx.RequestError as e:
+            logger.error(f"Request error: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            return None
 
     async def get_task(
         self,

@@ -39,7 +39,7 @@ class Assignment(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     task_id = Column(UUID(as_uuid=True), ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
-    assigned_date = Column(Date, nullable=False, default=date.today, index=True)
+    assigned_date = Column(Date, nullable=True, index=True)  # NULL означает "в очереди, не назначено на конкретный день"
     completed_at = Column(DateTime, nullable=True)
     status = Column(SQLEnum(AssignmentStatus), nullable=False, default=AssignmentStatus.PENDING, index=True)
     answer_text = Column(Text, nullable=True)

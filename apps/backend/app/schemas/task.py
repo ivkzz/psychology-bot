@@ -57,7 +57,7 @@ class AssignmentBase(BaseModel):
     """Базовая схема назначения задания."""
     user_id: UUID
     task_id: UUID
-    assigned_date: date = Field(default_factory=date.today)
+    assigned_date: Optional[date] = Field(None, description="Дата назначения (NULL = в очереди pending)")
 
 
 class AssignmentCreate(AssignmentBase):
@@ -94,7 +94,7 @@ class AssignmentResponse(BaseModel):
     id: UUID
     user_id: UUID
     task_id: UUID
-    assigned_date: date
+    assigned_date: Optional[date]  # Может быть NULL для pending заданий
     status: AssignmentStatus
     completed_at: Optional[datetime]
     answer_text: Optional[str]

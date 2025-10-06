@@ -11,13 +11,16 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 from datetime import datetime
 import uuid
+import os
 from passlib.context import CryptContext
-
-# Импорт settings для получения admin credentials
-from app.core.config import settings
 
 # Контекст для хеширования паролей
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Получаем admin credentials из переменных окружения
+ADMIN_NAME = os.getenv("ADMIN_NAME", "Admin")
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@example.com")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 
 # revision identifiers, used by Alembic.
 revision: str = '001'
@@ -76,15 +79,15 @@ def upgrade() -> None:
 
     # ========== SEED DATA ==========
 
-    # 1. Создаем администратора из настроек окружения
-    admin_password_hash = pwd_context.hash(settings.ADMIN_PASSWORD)
+    # 1. Создаем администратора из переменных окружения
+    admin_password_hash = pwd_context.hash(ADMIN_PASSWORD)
 
     op.execute(f"""
         INSERT INTO users (id, name, email, hashed_password, role, is_active, created_at, updated_at)
         VALUES (
             '{uuid.uuid4()}',
-            '{settings.ADMIN_NAME}',
-            '{settings.ADMIN_EMAIL}',
+            '{ADMIN_NAME}',
+            '{ADMIN_EMAIL}',
             '{admin_password_hash}',
             'ADMIN',
             true,

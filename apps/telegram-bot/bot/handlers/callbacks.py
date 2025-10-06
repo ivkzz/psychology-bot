@@ -6,6 +6,7 @@
 import logging
 from telegram import Update
 from telegram.ext import CallbackQueryHandler, ContextTypes
+from telegram.error import BadRequest
 from bot.services.api_client import api_client
 from bot.utils.keyboards import (
     get_main_menu_keyboard,
@@ -29,10 +30,13 @@ async def handle_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     query = update.callback_query
     await query.answer()
 
-    await query.edit_message_text(
-        "📱 Главное меню\n\nВыберите действие:",
-        reply_markup=get_main_menu_keyboard()
-    )
+    try:
+        await query.edit_message_text(
+            "📱 Главное меню\n\nВыберите действие:",
+            reply_markup=get_main_menu_keyboard()
+        )
+    except BadRequest as e:
+        logger.warning(f"BadRequest при редактировании сообщения: {e}")
 
 
 async def handle_today_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -50,25 +54,46 @@ async def handle_today_task(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     token = context.user_data.get("token")
 
     if not token:
-        await query.edit_message_text(Messages.ERROR_NO_TOKEN)
+        try:
+            await query.edit_message_text(Messages.ERROR_NO_TOKEN)
+        except BadRequest as e:
+            logger.warning(f"BadRequest при редактировании сообщения: {e}")
         return
 
     # Получаем задание на сегодня
     task = await api_client.get_today_task(token)
 
     if not task:
-        await query.edit_message_text(
-            Messages.NO_TASK_TODAY,
-            reply_markup=get_main_menu_keyboard()
-        )
+        try:
+            await query.edit_message_text(
+                Messages.NO_TASK_TODAY,
+                reply_markup=get_main_menu_keyboard()
+            )
+        except BadRequest as e:
+            logger.warning(f"BadRequest при редактировании сообщения: {e}")
+        return
+
+    # Проверяем, выполнил ли пользователь задание на сегодня
+    if task.get("already_completed"):
+        try:
+            await query.edit_message_text(
+                "✅ Отличная работа! Вы уже выполнили задание на сегодня.\n\n"
+                "Приходите завтра за новым заданием! 💪",
+                reply_markup=get_main_menu_keyboard()
+            )
+        except BadRequest as e:
+            logger.warning(f"BadRequest при редактировании сообщения: {e}")
         return
 
     # Проверяем статус задания
     if task.get("status") == "completed":
-        await query.edit_message_text(
-            Messages.TASK_ALREADY_COMPLETED,
-            reply_markup=get_main_menu_keyboard()
-        )
+        try:
+            await query.edit_message_text(
+                Messages.TASK_ALREADY_COMPLETED,
+                reply_markup=get_main_menu_keyboard()
+            )
+        except BadRequest as e:
+            logger.warning(f"BadRequest при редактировании сообщения: {e}")
         return
 
     # Сохраняем задание в context для использования в "Подробнее"
@@ -77,11 +102,14 @@ async def handle_today_task(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     # Форматируем и отправляем задание
     message = Messages.format_task(task)
 
-    await query.edit_message_text(
-        message,
-        reply_markup=get_task_keyboard(task.get("id")),
-        parse_mode="HTML"
-    )
+    try:
+        await query.edit_message_text(
+            message,
+            reply_markup=get_task_keyboard(task.get("id")),
+            parse_mode="HTML"
+        )
+    except BadRequest as e:
+        logger.warning(f"BadRequest при редактировании сообщения: {e}")
 
 
 async def handle_my_progress(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -99,27 +127,36 @@ async def handle_my_progress(update: Update, context: ContextTypes.DEFAULT_TYPE)
     token = context.user_data.get("token")
 
     if not token:
-        await query.edit_message_text(Messages.ERROR_NO_TOKEN)
+        try:
+            await query.edit_message_text(Messages.ERROR_NO_TOKEN)
+        except BadRequest as e:
+            logger.warning(f"BadRequest при редактировании сообщения: {e}")
         return
 
     # Получаем статистику
     progress = await api_client.get_user_progress(token)
 
     if not progress:
-        await query.edit_message_text(
-            Messages.ERROR_GENERAL,
-            reply_markup=get_main_menu_keyboard()
-        )
+        try:
+            await query.edit_message_text(
+                Messages.ERROR_GENERAL,
+                reply_markup=get_main_menu_keyboard()
+            )
+        except BadRequest as e:
+            logger.warning(f"BadRequest при редактировании сообщения: {e}")
         return
 
     # Форматируем и отправляем статистику
     message = Messages.format_progress(progress)
 
-    await query.edit_message_text(
-        message,
-        reply_markup=get_main_menu_keyboard(),
-        parse_mode="HTML"
-    )
+    try:
+        await query.edit_message_text(
+            message,
+            reply_markup=get_main_menu_keyboard(),
+            parse_mode="HTML"
+        )
+    except BadRequest as e:
+        logger.warning(f"BadRequest при редактировании сообщения: {e}")
 
 
 async def handle_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -133,11 +170,14 @@ async def handle_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     query = update.callback_query
     await query.answer()
 
-    await query.edit_message_text(
-        Messages.HELP_MESSAGE,
-        reply_markup=get_main_menu_keyboard(),
-        parse_mode="HTML"
-    )
+    try:
+        await query.edit_message_text(
+            Messages.HELP_MESSAGE,
+            reply_markup=get_main_menu_keyboard(),
+            parse_mode="HTML"
+        )
+    except BadRequest as e:
+        logger.warning(f"BadRequest при редактировании сообщения: {e}")
 
 
 async def handle_complete_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -187,20 +227,26 @@ async def handle_task_details(update: Update, context: ContextTypes.DEFAULT_TYPE
     task = context.user_data.get("current_task")
 
     if not task:
-        await query.edit_message_text(
-            Messages.ERROR_GENERAL,
-            reply_markup=get_main_menu_keyboard()
-        )
+        try:
+            await query.edit_message_text(
+                Messages.ERROR_GENERAL,
+                reply_markup=get_main_menu_keyboard()
+            )
+        except BadRequest as e:
+            logger.warning(f"BadRequest при редактировании сообщения: {e}")
         return
 
     # Форматируем детальное описание
     message = Messages.format_task_details(task)
 
-    await query.edit_message_text(
-        message,
-        reply_markup=get_task_keyboard(task_id),
-        parse_mode="HTML"
-    )
+    try:
+        await query.edit_message_text(
+            message,
+            reply_markup=get_task_keyboard(task_id),
+            parse_mode="HTML"
+        )
+    except BadRequest as e:
+        logger.warning(f"BadRequest при редактировании сообщения: {e}")
 
 
 async def handle_skip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -219,7 +265,10 @@ async def handle_skip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     task_id = context.user_data.get("current_task_id")
 
     if not token or not task_id:
-        await query.edit_message_text(Messages.ERROR_GENERAL)
+        try:
+            await query.edit_message_text(Messages.ERROR_GENERAL)
+        except BadRequest as e:
+            logger.warning(f"BadRequest при редактировании сообщения: {e}")
         return
 
     # Завершаем задание без ответа
@@ -230,18 +279,24 @@ async def handle_skip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     )
 
     if result:
-        await query.edit_message_text(
-            Messages.TASK_COMPLETED_SUCCESS,
-            reply_markup=get_task_completed_keyboard()
-        )
+        try:
+            await query.edit_message_text(
+                Messages.TASK_COMPLETED_SUCCESS,
+                reply_markup=get_task_completed_keyboard()
+            )
+        except BadRequest as e:
+            logger.warning(f"BadRequest при редактировании сообщения: {e}")
 
         logger.info(f"Task {task_id} completed (skipped) by user {update.effective_user.id}")
 
     else:
-        await query.edit_message_text(
-            Messages.ERROR_GENERAL,
-            reply_markup=get_main_menu_keyboard()
-        )
+        try:
+            await query.edit_message_text(
+                Messages.ERROR_GENERAL,
+                reply_markup=get_main_menu_keyboard()
+            )
+        except BadRequest as e:
+            logger.warning(f"BadRequest при редактировании сообщения: {e}")
 
     # Очищаем данные
     context.user_data.pop("current_task_id", None)

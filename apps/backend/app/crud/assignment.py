@@ -74,7 +74,7 @@ async def get_user_assignments(
 
 async def get_today_assignment(db: AsyncSession, user_id: UUID) -> Optional[Assignment]:
     """
-    Получить назначение пользователя на сегодня.
+    Получить назначение пользователя на сегодня (только PENDING).
 
     Args:
         db: Сессия базы данных
@@ -90,13 +90,100 @@ async def get_today_assignment(db: AsyncSession, user_id: UUID) -> Optional[Assi
         .where(
             and_(
                 Assignment.user_id == user_id,
-                Assignment.assigned_date == today
+                Assignment.assigned_date == today,
+                Assignment.status == AssignmentStatus.PENDING
             )
         )
         .order_by(Assignment.created_at.asc())  # Берём самое раннее задание
         .limit(1)
     )
     return result.scalar_one_or_none()
+
+
+async def has_completed_task_today(db: AsyncSession, user_id: UUID) -> bool:
+    """
+    Проверить, выполнил ли пользователь хотя бы одно задание сегодня.
+
+    Args:
+        db: Сессия базы данных
+        user_id: ID пользователя
+
+    Returns:
+        bool: True если есть выполненное задание на сегодня
+    """
+    today = date.today()
+    result = await db.execute(
+        select(Assignment)
+        .where(
+            and_(
+                Assignment.user_id == user_id,
+                Assignment.assigned_date == today,
+                Assignment.status == AssignmentStatus.COMPLETED
+            )
+        )
+        .limit(1)
+    )
+    return result.scalar_one_or_none() is not None
+
+
+async def get_next_pending_assignment(db: AsyncSession, user_id: UUID) -> Optional[Assignment]:
+    """
+    Получить следующее задание из очереди pending (assigned_date = NULL).
+
+    Args:
+        db: Сессия базы данных
+        user_id: ID пользователя
+
+    Returns:
+        Optional[Assignment]: Первое pending задание из очереди или None
+    """
+    result = await db.execute(
+        select(Assignment)
+        .options(selectinload(Assignment.task))
+        .where(
+            and_(
+                Assignment.user_id == user_id,
+                Assignment.assigned_date.is_(None),
+                Assignment.status == AssignmentStatus.PENDING
+            )
+        )
+        .order_by(Assignment.created_at.asc())  # FIFO - первое созданное
+        .limit(1)
+    )
+    return result.scalar_one_or_none()
+
+
+async def assign_pending_to_date(
+    db: AsyncSession,
+    assignment_id: UUID,
+    target_date: date
+) -> Assignment:
+    """
+    Назначить pending задание на конкретную дату.
+
+    Args:
+        db: Сессия базы данных
+        assignment_id: ID назначения
+        target_date: Целевая дата назначения
+
+    Returns:
+        Assignment: Обновленное назначение с датой
+    """
+    assignment = await get_by_id(db, assignment_id)
+    if not assignment:
+        raise ValueError("Assignment not found")
+
+    assignment.assigned_date = target_date
+    await db.commit()
+    await db.refresh(assignment)
+
+    # Перезагружаем с заданием
+    result = await db.execute(
+        select(Assignment)
+        .options(selectinload(Assignment.task))
+        .where(Assignment.id == assignment.id)
+    )
+    return result.scalar_one()
 
 
 async def create_daily_assignment(
@@ -106,44 +193,46 @@ async def create_daily_assignment(
     assigned_date: Optional[date] = None
 ) -> Assignment:
     """
-    Создать ежедневное назначение задания пользователю.
+    Создать назначение задания пользователю.
+
+    Если assigned_date = None, задание попадает в очередь pending (будет назначено при запросе).
+    Если указана дата, проверяем существование назначения на эту дату.
 
     Args:
         db: Сессия базы данных
         user_id: ID пользователя
         task_id: ID задания
-        assigned_date: Дата назначения (по умолчанию сегодня)
+        assigned_date: Дата назначения (None = в очередь, иначе конкретная дата)
 
     Returns:
         Assignment: Созданное назначение с загруженным заданием
     """
-    target_date = assigned_date or date.today()
-
-    # Проверяем, есть ли уже назначение на эту дату для этого пользователя
-    existing = await db.execute(
-        select(Assignment)
-        .where(
-            and_(
-                Assignment.user_id == user_id,
-                Assignment.assigned_date == target_date
+    # Если указана конкретная дата, проверяем существование
+    if assigned_date is not None:
+        existing = await db.execute(
+            select(Assignment)
+            .where(
+                and_(
+                    Assignment.user_id == user_id,
+                    Assignment.assigned_date == assigned_date
+                )
             )
         )
-    )
-    existing_assignment = existing.scalar_one_or_none()
+        existing_assignment = existing.scalar_one_or_none()
 
-    # Если уже есть задание на эту дату, возвращаем его
-    if existing_assignment:
-        result = await db.execute(
-            select(Assignment)
-            .options(selectinload(Assignment.task))
-            .where(Assignment.id == existing_assignment.id)
-        )
-        return result.scalar_one()
+        # Если уже есть задание на эту дату, возвращаем его
+        if existing_assignment:
+            result = await db.execute(
+                select(Assignment)
+                .options(selectinload(Assignment.task))
+                .where(Assignment.id == existing_assignment.id)
+            )
+            return result.scalar_one()
 
     assignment_data = AssignmentCreate(
         user_id=user_id,
         task_id=task_id,
-        assigned_date=target_date
+        assigned_date=assigned_date  # Может быть None для pending заданий
     )
 
     assignment = Assignment(**assignment_data.model_dump())
