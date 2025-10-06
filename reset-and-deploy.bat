@@ -1,111 +1,115 @@
 @echo off
-REM Скрипт для полной очистки и развертывания проекта Psychology Bot (Windows)
-REM Использование: reset-and-deploy.bat
+REM Psychology Bot - Full Reset and Deploy Script (Windows)
+REM Usage: reset-and-deploy.bat
 
 echo ==========================================
-echo ^🚀 Psychology Bot - Полное переразвертывание
+echo Psychology Bot - Full Redeploy
 echo ==========================================
 echo.
 
-echo ^⚠️  ВНИМАНИЕ: Это удалит ВСЕ данные!
-echo    - Docker контейнеры
-echo    - Docker образы
-echo    - Docker volumes (включая базу данных)
+echo WARNING: This will delete ALL data!
+echo    - Docker containers
+echo    - Docker images
+echo    - Docker volumes (including database)
 echo    - Docker networks
 echo.
-set /p REPLY="Продолжить? (yes/no): "
+set /p REPLY="Continue? (yes/no): "
 
 if /i not "%REPLY%"=="yes" (
-    echo ^❌ Отменено
+    echo Cancelled
     exit /b 1
 )
 
 echo.
 echo ==========================================
-echo ^🛑 Шаг 1: Остановка всех контейнеров
+echo Step 1: Stopping all containers
 echo ==========================================
 docker compose -f docker-compose.dev.yml down -v 2>nul
-echo ^✅ Контейнеры остановлены
+echo Containers stopped
 
 echo.
 echo ==========================================
-echo ^🗑️  Шаг 2: Удаление Docker образов
+echo Step 2: Removing Docker images
 echo ==========================================
-docker rmi psychologist-bot-backend 2>nul || echo Образ backend не найден
-docker rmi psychologist-bot-telegram-bot 2>nul || echo Образ telegram-bot не найден
-docker rmi psychologist-bot-frontend 2>nul || echo Образ frontend не найден
-echo ^✅ Образы удалены
+docker rmi psychologist-bot-backend 2>nul || echo Backend image not found
+docker rmi psychologist-bot-telegram-bot 2>nul || echo Telegram-bot image not found
+docker rmi psychologist-bot-frontend 2>nul || echo Frontend image not found
+echo Images removed
 
 echo.
 echo ==========================================
-echo ^🗑️  Шаг 3: Удаление Docker volumes
+echo Step 3: Removing Docker volumes
 echo ==========================================
-docker volume rm psychologist-bot_postgres_data 2>nul || echo Volume postgres_data не найден
-docker volume rm psychologist-bot_backend_cache 2>nul || echo Volume backend_cache не найден
-docker volume rm psychologist-bot_telegram_cache 2>nul || echo Volume telegram_cache не найден
-echo ^✅ Volumes удалены
+docker volume rm psychologist-bot_postgres_dev_data 2>nul || echo Volume postgres_dev_data not found
+docker volume rm psychologist-bot_backend_cache 2>nul || echo Volume backend_cache not found
+echo Volumes removed
 
 echo.
 echo ==========================================
-echo ^🗑️  Шаг 4: Удаление Docker networks
+echo Step 4: Removing Docker networks
 echo ==========================================
-docker network rm psychologist-bot_app-network-dev 2>nul || echo Network не найдена
-echo ^✅ Networks удалены
+docker network rm psychologist-bot_app-network-dev 2>nul || echo Network not found
+echo Networks removed
 
 echo.
 echo ==========================================
-echo ^🧹 Шаг 5: Очистка неиспользуемых ресурсов
+echo Step 5: Cleaning unused resources
 echo ==========================================
 docker system prune -f
-echo ^✅ Система очищена
+echo System cleaned
 
 echo.
 echo ==========================================
-echo ^🔨 Шаг 6: Сборка образов
+echo Step 6: Building images
 echo ==========================================
 docker compose -f docker-compose.dev.yml build --no-cache
-echo ^✅ Образы собраны
+echo Images built
 
 echo.
 echo ==========================================
-echo ^🚀 Шаг 7: Запуск контейнеров
+echo Step 7: Starting containers
 echo ==========================================
 docker compose -f docker-compose.dev.yml up -d
-echo ^✅ Контейнеры запущены
+echo Containers started
 
 echo.
 echo ==========================================
-echo ^⏳ Шаг 8: Ожидание готовности сервисов
+echo Step 8: Waiting for services
 echo ==========================================
-echo Ожидаем PostgreSQL...
+echo Waiting for PostgreSQL...
 timeout /t 5 /nobreak >nul
-echo Ожидаем Backend...
+echo Waiting for Backend...
 timeout /t 5 /nobreak >nul
-echo Ожидаем Telegram Bot...
+echo Waiting for Frontend...
+timeout /t 3 /nobreak >nul
+echo Waiting for Telegram Bot...
 timeout /t 3 /nobreak >nul
 
 echo.
 echo ==========================================
-echo ^📊 Шаг 9: Проверка статуса
+echo Step 9: Checking status
 echo ==========================================
 docker compose -f docker-compose.dev.yml ps
 
 echo.
 echo ==========================================
-echo ^✅ РАЗВЕРТЫВАНИЕ ЗАВЕРШЕНО!
+echo DEPLOYMENT COMPLETE!
 echo ==========================================
 echo.
-echo ^📌 Доступные сервисы:
-echo    ^🌐 Backend API:       http://localhost:8000
-echo    ^🌐 Frontend:          http://localhost:3000
-echo    ^🌐 PgAdmin:           http://localhost:5050
-echo    ^🤖 Telegram Bot:      Запущен и готов
+echo Available services:
+echo    Backend API:       http://localhost:8000
+echo    Frontend:          http://localhost:3000
+echo    API Docs:          http://localhost:8000/docs
+echo    PgAdmin:           http://localhost:5050
+echo    Telegram Bot:      Running
 echo.
-echo ^📋 Полезные команды:
-echo    docker compose -f docker-compose.dev.yml logs -f        # Логи всех сервисов
-echo    docker compose -f docker-compose.dev.yml logs backend   # Логи backend
-echo    docker compose -f docker-compose.dev.yml logs telegram-bot  # Логи бота
-echo    docker compose -f docker-compose.dev.yml ps             # Статус контейнеров
+echo Useful commands:
+echo    docker compose -f docker-compose.dev.yml logs -f           # All logs
+echo    docker compose -f docker-compose.dev.yml logs backend      # Backend logs
+echo    docker compose -f docker-compose.dev.yml logs frontend     # Frontend logs
+echo    docker compose -f docker-compose.dev.yml logs telegram-bot # Bot logs
+echo    docker compose -f docker-compose.dev.yml ps                # Container status
+echo    docker compose -f docker-compose.dev.yml restart frontend  # Restart frontend
 echo.
-echo ^🎉 Готово к работе!
+echo Ready to work!
 pause

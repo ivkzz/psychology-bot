@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Standalone output для оптимизации Docker образа
+  // Создает минимальный самодостаточный build
+  output: "standalone",
 };
 
 export default nextConfig;

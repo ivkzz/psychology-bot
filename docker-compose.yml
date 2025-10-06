@@ -30,6 +30,13 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-15}
       REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS:-7}
       DEBUG: ${DEBUG:-false}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      SCHEDULER_TIMEZONE: ${SCHEDULER_TIMEZONE:-Europe/Moscow}
+      MORNING_TASK_TIME: ${MORNING_TASK_TIME:-09:00}
+      EVENING_REMINDER_TIME: ${EVENING_REMINDER_TIME:-20:00}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@psychologist-bot.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      ADMIN_NAME: ${ADMIN_NAME:-Admin}
     volumes:
       - ./apps/backend:/app
     ports:
@@ -62,6 +69,24 @@ services:
         condition: service_started
       postgres:
         condition: service_healthy
+    restart: ${DOCKER_RESTART_POLICY:-unless-stopped}
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: psychologist_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
     restart: ${DOCKER_RESTART_POLICY:-unless-stopped}
     networks:
       - app-network

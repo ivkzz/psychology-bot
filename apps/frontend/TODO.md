@@ -20,10 +20,12 @@
 
 - [x] **ГОТОВО:** Создать файл `.env.local`
 
-- [ ] **TODO:** Настроить Docker
-  - [ ] Создать `Dockerfile` (multi-stage build)
-  - [ ] Добавить `.dockerignore`
-  - [ ] Интегрировать в `docker-compose.yml`
+- [x] **ГОТОВО:** Настроить Docker
+  - [x] Создать `Dockerfile` (multi-stage build: development, builder, production)
+  - [x] Добавить `.dockerignore`
+  - [x] Интегрировать в `docker-compose.dev.yml` (development режим)
+  - [x] Интегрировать в `docker-compose.yml` (production режим)
+  - [x] Настроить `output: "standalone"` в `next.config.ts` для оптимизации
 
 ---
 
@@ -573,7 +575,7 @@ export interface PaginatedResponse<T> {
 6. ✅ API методы для auth (register, login, refresh, logout)
 7. ✅ Страницы login/register с формами (react-hook-form + zod)
 8. ✅ Middleware для защиты роутов (проверка токенов)
-9. ⏸️ Docker конфигурация (Dockerfile + docker-compose.yml) - ОТЛОЖЕНО
+9. ✅ Docker конфигурация (Dockerfile + docker-compose.yml + .dockerignore + standalone output)
 
 ### Sprint 2 (5-7 дней): Пользовательский кабинет ✅ ЗАВЕРШЕН
 1. ✅ Layout (Header с навигацией, Footer)

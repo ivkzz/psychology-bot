@@ -72,7 +72,7 @@ class Settings(BaseSettings):
 
     # Seed данные для первого администратора
     ADMIN_EMAIL: str = Field(
-        default="klevin.ivan.ivk@yandex.ru",
+        default="admin@psychologist-bot.com",
         description="Email администратора для первоначального seed"
     )
     ADMIN_PASSWORD: str = Field(
@@ -81,7 +81,7 @@ class Settings(BaseSettings):
     )
     ADMIN_NAME: str = Field(
         default="Admin",
-        description="IVK"
+        description="Admin"
     )
 
 

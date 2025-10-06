@@ -70,43 +70,6 @@ INFO:     Morning tasks distribution completed: 1 success, 0 errors
 
 ---
 
-## 🧪 Способ 2: Ручной запуск через API (для немедленного теста)
-
-### Шаг 1: Получить токен администратора
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"klevin.ivan.ivk@yandex.ru","password":"admin123"}'
-```
-
-Скопируйте `access_token` из ответа.
-
-### Шаг 2: Запустить утренние задания
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/admin/scheduler/send-morning-tasks" \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
-```
-
-### Шаг 3: Запустить вечерние напоминания
-
-```bash
-curl -X POST "http://localhost:8000/api/v1/admin/scheduler/send-evening-reminders" \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
-```
-
-**Ожидаемый ответ:**
-```json
-{"message":"Morning tasks sent successfully"}
-```
-
-### Шаг 4: Проверить Telegram
-
-Откройте бота в Telegram и проверьте, что пришло сообщение с утренним заданием.
-
----
-
 ## 📋 Проверка статуса планировщика
 
 ### Проверить, что планировщик запущен

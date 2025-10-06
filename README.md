@@ -26,10 +26,14 @@ Psychology Bot - это комплексное решение для психо�
 - **APScheduler** - планировщик задач для напоминаний
 - **httpx** - async HTTP клиент для взаимодействия с Backend API
 
-### Frontend (планируется)
+### Frontend
 - **Next.js 15** - React фреймворк с App Router
 - **TypeScript** - типизированный JavaScript
 - **Tailwind CSS** - utility-first CSS фреймворк
+- **shadcn/ui** - UI компоненты
+- **TanStack Query** - управление server state
+- **Zustand** - управление client state
+- **React Hook Form + Zod** - формы и валидация
 
 ### Infrastructure
 - **Docker** - контейнеризация приложений
@@ -64,7 +68,13 @@ psychology-bot/
 │   │   ├── Dockerfile
 │   │   └── requirements.txt
 │   │
-│   └── frontend/             # Next.js приложение (будет реализовано)
+│   └── frontend/             # Next.js приложение
+│       ├── app/              # App Router (Next.js 15)
+│       ├── components/       # React компоненты
+│       ├── lib/              # API клиент, хуки, утилиты
+│       ├── types/            # TypeScript типы
+│       ├── Dockerfile
+│       └── package.json
 │
 ├── shared/                   # Общий код
 │   ├── constants.py
@@ -146,11 +156,13 @@ docker compose -f docker-compose.dev.yml ps
 
 После запуска проверьте доступность сервисов:
 
+- **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8000
 - **API Docs (Swagger)**: http://localhost:8000/docs
 - **Health Check**: http://localhost:8000/health
 - **PostgreSQL**: localhost:5432
 - **PgAdmin (dev)**: http://localhost:5050 (admin@admin.com / admin)
+- **Telegram Bot**: Активен и отвечает на команды
 
 ## API Endpoints
 
@@ -295,6 +307,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ## Логирование
 
+- Frontend: логи доступны через `docker compose logs frontend`
 - Backend: логи доступны через `docker compose logs backend`
 - Telegram Bot: логи доступны через `docker compose logs telegram-bot`
 - PostgreSQL: логи доступны через `docker compose logs postgres`
@@ -302,6 +315,8 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 Просмотр логов в реальном времени:
 ```bash
 docker compose logs -f backend
+docker compose logs -f frontend
+docker compose logs -f  # все сервисы
 ```
 
 ## Тестирование
