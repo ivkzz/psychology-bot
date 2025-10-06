@@ -3,10 +3,54 @@
 Точка входа для Backend API.
 """
 
+import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import close_db
+
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan context manager для управления жизненным циклом приложения.
+    """
+    # Startup
+    import sys
+    print(f"🚀 Starting {settings.APP_NAME}", flush=True)
+    sys.stdout.flush()
+    print(f"🐛 Debug mode: {settings.DEBUG}", flush=True)
+    sys.stdout.flush()
+
+    # Запускаем планировщик задач (если настроен Telegram Bot Token)
+    scheduler = None
+    if settings.TELEGRAM_BOT_TOKEN:
+        print("📋 TELEGRAM_BOT_TOKEN found, starting scheduler...", flush=True)
+        sys.stdout.flush()
+        from app.services.task_scheduler import task_scheduler
+        task_scheduler.start()
+        scheduler = task_scheduler
+        print("✅ Task scheduler started successfully", flush=True)
+        sys.stdout.flush()
+        print(f"📅 Morning tasks: {settings.MORNING_TASK_TIME}, Evening reminders: {settings.EVENING_REMINDER_TIME}", flush=True)
+        sys.stdout.flush()
+    else:
+        print("⚠️  TELEGRAM_BOT_TOKEN not set, scheduler disabled", flush=True)
+        sys.stdout.flush()
+
+    yield
+
+    # Shutdown
+    logger.info("Shutting down application...")
+
+    if scheduler:
+        scheduler.stop()
+        logger.info("Task scheduler stopped")
+
+    await close_db()
 
 
 # Создаем экземпляр приложения FastAPI
@@ -15,6 +59,7 @@ app = FastAPI(
     version="1.0.0",
     description="API для психолог-бота с поддержкой задач, пользователей и Telegram интеграции",
     debug=settings.DEBUG,
+    lifespan=lifespan,
 )
 
 # Настройка CORS
@@ -25,28 +70,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-async def startup_event():
-    """
-    Событие запуска приложения.
-    Инициализирует подключения и ресурсы.
-    """
-    print(f"Starting {settings.APP_NAME}")
-    print(f"Debug mode: {settings.DEBUG}")
-    # Здесь можно добавить дополнительную инициализацию
-    # Например, подключение к Redis, проверка БД и т.д.
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """
-    Событие остановки приложения.
-    Закрывает подключения и освобождает ресурсы.
-    """
-    print("Shutting down application...")
-    await close_db()
 
 
 @app.get("/", tags=["Health"])

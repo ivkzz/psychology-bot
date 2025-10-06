@@ -292,3 +292,51 @@ async def assign_task_to_user(
     # Создаем назначение
     assignment = await assignment_crud.create_daily_assignment(db, user_id, task_id)
     return AssignmentResponse.model_validate(assignment)
+
+
+# ============ Управление планировщиком (для тестирования) ============
+
+@router.post("/scheduler/send-morning-tasks", status_code=status.HTTP_200_OK)
+async def trigger_morning_tasks(
+    _: User = Depends(get_current_admin_user)
+):
+    """
+    Вручную запустить отправку утренних заданий (только для администраторов).
+    Используется для тестирования планировщика.
+
+    Returns:
+        dict: Результат выполнения
+    """
+    from app.services.task_scheduler import task_scheduler
+
+    try:
+        await task_scheduler.send_morning_tasks()
+        return {"message": "Morning tasks sent successfully"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error sending morning tasks: {str(e)}"
+        )
+
+
+@router.post("/scheduler/send-evening-reminders", status_code=status.HTTP_200_OK)
+async def trigger_evening_reminders(
+    _: User = Depends(get_current_admin_user)
+):
+    """
+    Вручную запустить отправку вечерних напоминаний (только для администраторов).
+    Используется для тестирования планировщика.
+
+    Returns:
+        dict: Результат выполнения
+    """
+    from app.services.task_scheduler import task_scheduler
+
+    try:
+        await task_scheduler.send_evening_reminders()
+        return {"message": "Evening reminders sent successfully"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error sending evening reminders: {str(e)}"
+        )

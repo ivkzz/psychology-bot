@@ -56,6 +56,9 @@ class BotSettings(BaseSettings):
     # Admin токен для планировщика (получение всех пользователей)
     ADMIN_TOKEN: Optional[str] = None
 
+    # Admin Telegram IDs (через запятую) для тестовых команд
+    ADMIN_TELEGRAM_IDS: str = ""
+
 
 # Создаем глобальный экземпляр настроек
 bot_settings = BotSettings()

@@ -12,7 +12,6 @@ from telegram.ext import Application, ContextTypes, MessageHandler, filters
 from telegram.constants import ParseMode
 from bot.config import bot_settings
 from bot.services.api_client import api_client
-from bot.services.scheduler import TaskScheduler
 
 # Импорт handlers
 from bot.handlers.start import registration_handler
@@ -31,10 +30,6 @@ logging.basicConfig(
     level=getattr(logging, bot_settings.LOG_LEVEL)
 )
 logger = logging.getLogger(__name__)
-
-# Глобальная переменная для планировщика
-scheduler = None
-
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
@@ -87,7 +82,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 async def post_init(application: Application) -> None:
     """
     Callback после инициализации приложения.
-    Проверяет доступность Backend API и запускает планировщик.
+    Проверяет доступность Backend API.
 
     Args:
         application: Объект Application
@@ -102,30 +97,18 @@ async def post_init(application: Application) -> None:
     else:
         logger.warning("Backend API is not available! Bot may not work correctly.")
 
-    # Инициализируем и запускаем планировщик
-    global scheduler
-    scheduler = TaskScheduler(application)
-    scheduler.start()
-
     logger.info("Bot startup completed")
 
 
 async def post_shutdown(application: Application) -> None:
     """
     Callback перед остановкой приложения.
-    Останавливает планировщик и закрывает соединения.
+    Закрывает соединения.
 
     Args:
         application: Объект Application
     """
     logger.info("Shutting down bot...")
-
-    # Останавливаем планировщик
-    global scheduler
-    if scheduler:
-        scheduler.stop()
-        logger.info("Scheduler stopped")
-
     logger.info("Bot shutdown completed")
 
 

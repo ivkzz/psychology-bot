@@ -65,6 +65,11 @@ class Settings(BaseSettings):
     # Telegram Bot (для интеграции)
     TELEGRAM_BOT_TOKEN: Optional[str] = None
 
+    # Scheduler настройки
+    SCHEDULER_TIMEZONE: str = "Europe/Moscow"
+    MORNING_TASK_TIME: str = "09:00"
+    EVENING_REMINDER_TIME: str = "20:00"
+
     # Seed данные для первого администратора
     ADMIN_EMAIL: str = Field(
         default="klevin.ivan.ivk@yandex.ru",
