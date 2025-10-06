@@ -46,7 +46,7 @@ import {
   XCircle,
   Plus,
 } from 'lucide-react'
-import { formatDate, formatDifficulty, getDifficultyColor } from '@/lib/utils/formatters'
+import { formatDate, formatDifficulty } from '@/lib/utils/formatters'
 
 export default function AdminUserDetailsPage() {
   const params = useParams()

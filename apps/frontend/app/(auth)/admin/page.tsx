@@ -23,8 +23,6 @@ import {
   CheckSquare,
   TrendingUp,
   ArrowRight,
-  UserPlus,
-  FilePlus,
 } from 'lucide-react'
 import { formatDate } from '@/lib/utils/formatters'
 import { useMemo } from 'react'

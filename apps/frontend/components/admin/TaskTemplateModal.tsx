@@ -37,7 +37,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCreateTemplate, useUpdateTemplate } from '@/lib/hooks/use-admin'
-import type { Task, TaskDifficulty } from '@/types'
+import { Task, TaskDifficulty } from '@/types'
 import { formatDifficulty, getDifficultyColor } from '@/lib/utils/formatters'
 
 const taskSchema = z.object({
@@ -50,8 +50,8 @@ const taskSchema = z.object({
     .string()
     .min(1, 'Категория обязательна')
     .max(50, 'Максимум 50 символов'),
-  difficulty: z.enum(['easy', 'medium', 'hard'], {
-    required_error: 'Выберите сложность',
+  difficulty: z.nativeEnum(TaskDifficulty, {
+    message: 'Выберите сложность',
   }),
 })
 
@@ -91,7 +91,7 @@ export function TaskTemplateModal({
       title: '',
       description: '',
       category: '',
-      difficulty: 'easy',
+      difficulty: TaskDifficulty.EASY,
     },
   })
 
@@ -102,7 +102,7 @@ export function TaskTemplateModal({
         title: task.title,
         description: task.description,
         category: task.category,
-        difficulty: task.difficulty as 'easy' | 'medium' | 'hard',
+        difficulty: task.difficulty,
       })
     } else if (!open) {
       form.reset()
@@ -250,9 +250,9 @@ export function TaskTemplateModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="easy">Лёгкое</SelectItem>
-                        <SelectItem value="medium">Среднее</SelectItem>
-                        <SelectItem value="hard">Сложное</SelectItem>
+                        <SelectItem value={TaskDifficulty.EASY}>Лёгкое</SelectItem>
+                        <SelectItem value={TaskDifficulty.MEDIUM}>Среднее</SelectItem>
+                        <SelectItem value={TaskDifficulty.HARD}>Сложное</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

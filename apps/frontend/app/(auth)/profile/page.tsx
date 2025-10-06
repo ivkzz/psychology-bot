@@ -10,6 +10,7 @@ import { z } from 'zod'
 import { useCurrentUser } from '@/lib/hooks/use-auth'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { usersApi } from '@/lib/api/users'
+import { UserRole } from '@/types/user'
 import {
   Card,
   CardContent,
@@ -130,8 +131,8 @@ export default function ProfilePage() {
 
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Роль:</span>
-              <Badge variant={user?.role === 'ADMIN' ? 'default' : 'secondary'}>
-                {user?.role === 'ADMIN' ? 'Администратор' : 'Пользователь'}
+              <Badge variant={user?.role === UserRole.ADMIN ? 'default' : 'secondary'}>
+                {user?.role === UserRole.ADMIN ? 'Администратор' : 'Пользователь'}
               </Badge>
             </div>
 

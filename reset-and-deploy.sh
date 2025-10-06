@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Скрипт для полной очистки и развертывания проекта Psychology Bot
+# Скрипт для полной очистки и развертывания проекта Psychology Bot (PRODUCTION)
 # Использование: ./reset-and-deploy.sh
 
 set -e  # Останавливаем при ошибке
 
 echo "=========================================="
-echo "🚀 Psychology Bot - Полное переразвертывание"
+echo "🚀 Psychology Bot - Production Deployment"
 echo "=========================================="
 echo ""
 
@@ -35,6 +35,7 @@ echo ""
 echo "=========================================="
 echo "🛑 Шаг 1: Остановка всех контейнеров"
 echo "=========================================="
+docker compose down -v 2>/dev/null || true
 docker compose -f docker-compose.dev.yml down -v 2>/dev/null || true
 echo -e "${GREEN}✅ Контейнеры остановлены${NC}"
 
@@ -51,6 +52,7 @@ echo ""
 echo "=========================================="
 echo "🗑️  Шаг 3: Удаление Docker volumes"
 echo "=========================================="
+docker volume rm psychologist-bot_postgres_data 2>/dev/null || echo "Volume postgres_data не найден"
 docker volume rm psychologist-bot_postgres_dev_data 2>/dev/null || echo "Volume postgres_dev_data не найден"
 docker volume rm psychologist-bot_backend_cache 2>/dev/null || echo "Volume backend_cache не найден"
 echo -e "${GREEN}✅ Volumes удалены${NC}"
@@ -59,7 +61,8 @@ echo ""
 echo "=========================================="
 echo "🗑️  Шаг 4: Удаление Docker networks"
 echo "=========================================="
-docker network rm psychologist-bot_app-network-dev 2>/dev/null || echo "Network не найдена"
+docker network rm psychologist-bot_app-network 2>/dev/null || echo "Network не найдена"
+docker network rm psychologist-bot_app-network-dev 2>/dev/null || echo "Network dev не найдена"
 echo -e "${GREEN}✅ Networks удалены${NC}"
 
 echo ""
@@ -71,16 +74,16 @@ echo -e "${GREEN}✅ Система очищена${NC}"
 
 echo ""
 echo "=========================================="
-echo "🔨 Шаг 6: Сборка образов"
+echo "🔨 Шаг 6: Сборка PRODUCTION образов"
 echo "=========================================="
-docker compose -f docker-compose.dev.yml build --no-cache
-echo -e "${GREEN}✅ Образы собраны${NC}"
+docker compose build --no-cache
+echo -e "${GREEN}✅ Production образы собраны${NC}"
 
 echo ""
 echo "=========================================="
-echo "🚀 Шаг 7: Запуск контейнеров"
+echo "🚀 Шаг 7: Запуск контейнеров в PRODUCTION режиме"
 echo "=========================================="
-docker compose -f docker-compose.dev.yml up -d
+docker compose up -d
 echo -e "${GREEN}✅ Контейнеры запущены${NC}"
 
 echo ""
@@ -100,26 +103,30 @@ echo ""
 echo "=========================================="
 echo "📊 Шаг 9: Проверка статуса"
 echo "=========================================="
-docker compose -f docker-compose.dev.yml ps
+docker compose ps
 
 echo ""
 echo "=========================================="
-echo "✅ РАЗВЕРТЫВАНИЕ ЗАВЕРШЕНО!"
+echo "✅ PRODUCTION DEPLOYMENT COMPLETE!"
 echo "=========================================="
 echo ""
 echo "📌 Доступные сервисы:"
 echo "   🌐 Backend API:       http://localhost:8000"
 echo "   🌐 Frontend:          http://localhost:3000"
 echo "   🌐 API Docs:          http://localhost:8000/docs"
-echo "   🌐 PgAdmin:           http://localhost:5050"
 echo "   🤖 Telegram Bot:      Запущен и готов"
 echo ""
+echo -e "${YELLOW}NOTE: This is PRODUCTION mode:${NC}"
+echo "   - DevTools are disabled"
+echo "   - Optimized builds"
+echo "   - No hot reload"
+echo ""
 echo "📋 Полезные команды:"
-echo "   docker compose -f docker-compose.dev.yml logs -f           # Логи всех сервисов"
-echo "   docker compose -f docker-compose.dev.yml logs backend      # Логи backend"
-echo "   docker compose -f docker-compose.dev.yml logs frontend     # Логи frontend"
-echo "   docker compose -f docker-compose.dev.yml logs telegram-bot # Логи бота"
-echo "   docker compose -f docker-compose.dev.yml ps                # Статус контейнеров"
-echo "   docker compose -f docker-compose.dev.yml restart frontend  # Перезапуск frontend"
+echo "   docker compose logs -f           # Логи всех сервисов"
+echo "   docker compose logs backend      # Логи backend"
+echo "   docker compose logs frontend     # Логи frontend"
+echo "   docker compose logs telegram-bot # Логи бота"
+echo "   docker compose ps                # Статус контейнеров"
+echo "   docker compose restart frontend  # Перезапуск frontend"
 echo ""
 echo -e "${GREEN}🎉 Готово к работе!${NC}"

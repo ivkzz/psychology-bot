@@ -102,8 +102,11 @@ export function useCreateTemplate() {
 
       toast.success(`Шаблон "${newTemplate.title}" создан!`)
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Ошибка создания шаблона')
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail
+        : 'Ошибка создания шаблона'
+      toast.error(errorMessage || 'Ошибка создания шаблона')
     },
   })
 }
@@ -130,8 +133,11 @@ export function useUpdateTemplate() {
 
       toast.success(`Шаблон "${updatedTemplate.title}" обновлён!`)
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Ошибка обновления шаблона')
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail
+        : 'Ошибка обновления шаблона'
+      toast.error(errorMessage || 'Ошибка обновления шаблона')
     },
   })
 }
@@ -152,8 +158,11 @@ export function useDeleteTemplate() {
 
       toast.success('Шаблон удалён')
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Ошибка удаления шаблона')
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail
+        : 'Ошибка удаления шаблона'
+      toast.error(errorMessage || 'Ошибка удаления шаблона')
     },
   })
 }
@@ -190,8 +199,11 @@ export function useAssignTask() {
 
       toast.success(`Задание "${assignment.task.title}" назначено!`)
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Ошибка назначения задания')
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error && 'response' in error
+        ? (error as { response?: { data?: { detail?: string } } }).response?.data?.detail
+        : 'Ошибка назначения задания'
+      toast.error(errorMessage || 'Ошибка назначения задания')
     },
   })
 }
