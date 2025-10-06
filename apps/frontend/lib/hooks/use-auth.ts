@@ -33,12 +33,18 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: (data: LoginRequest) => authApi.login(data),
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       // Сохраняем токены в Zustand (и localStorage)
       setTokens(response.access_token, response.refresh_token)
 
-      // Инвалидируем кеш пользователя чтобы загрузить данные
-      queryClient.invalidateQueries({ queryKey: ['users', 'me'] })
+      // Получаем данные пользователя чтобы узнать роль
+      const user = await usersApi.getCurrentUser()
+
+      // Сохраняем роль в cookies для middleware
+      document.cookie = `userRole=${user.role}; path=/; max-age=604800; SameSite=Lax`
+
+      // Сохраняем user data в кеше TanStack Query
+      queryClient.setQueryData(['users', 'me'], user)
 
       // Редирект на dashboard
       router.push('/dashboard')
@@ -59,6 +65,9 @@ export function useRegister() {
     onSuccess: (response) => {
       // Сохраняем токены в Zustand (и localStorage)
       setTokens(response.access_token, response.refresh_token)
+
+      // Сохраняем роль в cookies для middleware
+      document.cookie = `userRole=${response.user.role}; path=/; max-age=604800; SameSite=Lax`
 
       // Сохраняем user data в кеше TanStack Query
       queryClient.setQueryData(['users', 'me'], response.user)
@@ -83,6 +92,9 @@ export function useLogout() {
       // Очищаем токены из Zustand (и localStorage)
       clearTokens()
 
+      // Удаляем роль из cookies
+      document.cookie = 'userRole=; path=/; max-age=0'
+
       // Очищаем весь кеш TanStack Query
       queryClient.clear()
 
@@ -92,6 +104,7 @@ export function useLogout() {
     onError: () => {
       // Даже при ошибке очищаем токены и редиректим
       clearTokens()
+      document.cookie = 'userRole=; path=/; max-age=0'
       queryClient.clear()
       router.push('/login')
     },

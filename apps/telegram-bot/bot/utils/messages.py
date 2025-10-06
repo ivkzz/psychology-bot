@@ -136,16 +136,19 @@ class Messages:
         return message
 
     @staticmethod
-    def format_task(task: Dict[str, Any]) -> str:
+    def format_task(assignment: Dict[str, Any]) -> str:
         """
         Форматирует информацию о задании.
 
         Args:
-            task: Словарь с данными о задании
+            assignment: Словарь с данными о назначении (может содержать вложенный task)
 
         Returns:
             Отформатированное сообщение с заданием
         """
+        # Проверяем, это Assignment или сам Task
+        task = assignment.get("task", assignment)
+
         title = task.get("title", "Задание")
         description = task.get("description", "")
         category = task.get("category", "")
@@ -169,17 +172,20 @@ class Messages:
         return message
 
     @staticmethod
-    def format_task_details(task: Dict[str, Any]) -> str:
+    def format_task_details(assignment: Dict[str, Any]) -> str:
         """
         Форматирует детальную информацию о задании.
 
         Args:
-            task: Словарь с данными о задании
+            assignment: Словарь с данными о назначении (может содержать вложенный task)
 
         Returns:
             Отформатированное детальное сообщение
         """
-        base_info = Messages.format_task(task)
+        base_info = Messages.format_task(assignment)
+
+        # Проверяем, это Assignment или сам Task
+        task = assignment.get("task", assignment)
 
         instructions = task.get("instructions", "")
         expected_time = task.get("expected_time", "")

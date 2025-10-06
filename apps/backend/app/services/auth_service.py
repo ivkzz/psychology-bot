@@ -70,7 +70,7 @@ async def login(db: AsyncSession, data: LoginRequest) -> TokenResponse:
 
     Args:
         db: Сессия базы данных
-        data: Данные для входа
+        data: Данные для входа (email+password или telegram_id)
 
     Returns:
         TokenResponse: Токены доступа
@@ -78,29 +78,44 @@ async def login(db: AsyncSession, data: LoginRequest) -> TokenResponse:
     Raises:
         HTTPException: Если пользователь не найден или пароль неверный
     """
-    # Проверяем существование пользователя
-    user = await user_crud.get_by_email(db, data.email)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Неверный email или пароль",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    # Вход через Telegram ID
+    if data.telegram_id:
+        user = await user_crud.get_by_telegram_id(db, data.telegram_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Пользователь с таким Telegram ID не найден",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    # Вход через email + password
+    elif data.email and data.password:
+        user = await user_crud.get_by_email(db, data.email)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Неверный email или пароль",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
-    # Проверяем, установлен ли пароль
-    if not user.hashed_password:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Для этого пользователя не установлен пароль. Используйте вход через Telegram.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        # Проверяем, установлен ли пароль
+        if not user.hashed_password:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Для этого пользователя не установлен пароль. Используйте вход через Telegram.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
-    # Проверяем пароль
-    if not verify_password(data.password, user.hashed_password):
+        # Проверяем пароль
+        if not verify_password(data.password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Неверный email или пароль",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    else:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Неверный email или пароль",
-            headers={"WWW-Authenticate": "Bearer"},
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Необходимо указать либо telegram_id, либо email и password"
         )
 
     # Проверяем активность пользователя

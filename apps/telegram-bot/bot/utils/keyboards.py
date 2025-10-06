@@ -40,8 +40,7 @@ def get_task_keyboard(task_id: str) -> InlineKeyboardMarkup:
     """
     keyboard = [
         [
-            InlineKeyboardButton("✅ Выполнить", callback_data=f"complete_task_{task_id}"),
-            InlineKeyboardButton("📝 Подробнее", callback_data=f"task_details_{task_id}")
+            InlineKeyboardButton("✅ Выполнить", callback_data=f"complete_task_{task_id}")
         ],
         [
             InlineKeyboardButton("🏠 Главное меню", callback_data="main_menu")

@@ -585,14 +585,14 @@ export interface PaginatedResponse<T> {
 7. ✅ Компоненты: TaskCard, CompleteTaskModal
 8. ✅ Toast уведомления (sonner) - уже настроено в Sprint 1
 
-### Sprint 3 (5-7 дней): Админ-панель
-1. Middleware проверка роли admin
-2. Admin Dashboard (общая статистика)
-3. Список пользователей (таблица + фильтры)
-4. Детали пользователя (профиль + история + назначение)
-5. Управление шаблонами (CRUD)
-6. Модальные окна: создание/редактирование/удаление шаблонов
-7. API хуки для админки
+### Sprint 3 (5-7 дней): Админ-панель ✅ ЗАВЕРШЕН
+1. ✅ Middleware проверка роли admin
+2. ✅ Admin Dashboard (общая статистика)
+3. ✅ Список пользователей (таблица + фильтры)
+4. ✅ Детали пользователя (профиль + история + назначение)
+5. ✅ Управление шаблонами (CRUD)
+6. ✅ Модальные окна: создание/редактирование/удаление шаблонов
+7. ✅ API хуки для админки
 
 ### Sprint 4 (3-5 дней): Доработки + UX
 1. Responsive дизайн (mobile/tablet)
@@ -622,7 +622,6 @@ export interface PaginatedResponse<T> {
 - [React Hook Form](https://react-hook-form.com/)
 - [Zod](https://zod.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)
-- [Recharts](https://recharts.org/)
 
 ---
 

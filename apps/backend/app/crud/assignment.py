@@ -93,6 +93,8 @@ async def get_today_assignment(db: AsyncSession, user_id: UUID) -> Optional[Assi
                 Assignment.assigned_date == today
             )
         )
+        .order_by(Assignment.created_at.asc())  # Берём самое раннее задание
+        .limit(1)
     )
     return result.scalar_one_or_none()
 
@@ -115,10 +117,33 @@ async def create_daily_assignment(
     Returns:
         Assignment: Созданное назначение с загруженным заданием
     """
+    target_date = assigned_date or date.today()
+
+    # Проверяем, есть ли уже назначение на эту дату для этого пользователя
+    existing = await db.execute(
+        select(Assignment)
+        .where(
+            and_(
+                Assignment.user_id == user_id,
+                Assignment.assigned_date == target_date
+            )
+        )
+    )
+    existing_assignment = existing.scalar_one_or_none()
+
+    # Если уже есть задание на эту дату, возвращаем его
+    if existing_assignment:
+        result = await db.execute(
+            select(Assignment)
+            .options(selectinload(Assignment.task))
+            .where(Assignment.id == existing_assignment.id)
+        )
+        return result.scalar_one()
+
     assignment_data = AssignmentCreate(
         user_id=user_id,
         task_id=task_id,
-        assigned_date=assigned_date or date.today()
+        assigned_date=target_date
     )
 
     assignment = Assignment(**assignment_data.model_dump())

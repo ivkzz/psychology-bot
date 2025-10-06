@@ -8,7 +8,7 @@ import html
 import json
 import traceback
 from telegram import Update
-from telegram.ext import Application, ContextTypes
+from telegram.ext import Application, ContextTypes, MessageHandler, filters
 from telegram.constants import ParseMode
 from bot.config import bot_settings
 from bot.services.api_client import api_client
@@ -23,7 +23,7 @@ from bot.handlers.commands import (
     cancel_handler
 )
 from bot.handlers.conversations import complete_task_handler
-from bot.handlers.callbacks import callback_handlers
+from bot.handlers.callbacks import callback_handlers, handle_task_answer
 
 # Настройка логирования
 logging.basicConfig(
@@ -157,11 +157,16 @@ def main() -> None:
     application.add_handler(progress_handler)
     application.add_handler(cancel_handler)
 
-    # 3. CallbackQueryHandlers
+    # 3. MessageHandler для ответов на задания
+    application.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_task_answer)
+    )
+
+    # 4. CallbackQueryHandlers
     for callback_handler in callback_handlers:
         application.add_handler(callback_handler)
 
-    # 4. Error handler (должен быть последним)
+    # 5. Error handler (должен быть последним)
     application.add_error_handler(error_handler)
 
     # Запуск бота

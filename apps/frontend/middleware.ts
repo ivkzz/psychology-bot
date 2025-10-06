@@ -11,6 +11,13 @@ export function middleware(request: NextRequest) {
   // Получаем токен из cookies или localStorage (проверяем через header)
   const accessToken = request.cookies.get('accessToken')?.value
 
+  // Получаем роль пользователя из cookies (устанавливается при логине)
+  const userRole = request.cookies.get('userRole')?.value
+
+  // Админ роуты (требуют роль admin)
+  const adminRoutes = ['/admin']
+  const isAdminRoute = adminRoutes.some((route) => pathname.startsWith(route))
+
   // Защищенные роуты (требуют авторизации)
   const protectedRoutes = ['/dashboard', '/admin', '/tasks', '/history', '/stats', '/profile']
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -28,6 +35,11 @@ export function middleware(request: NextRequest) {
 
   // Если пользователь авторизован и пытается зайти на login/register
   if (isAuthRoute && accessToken) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // Если пользователь не админ и пытается зайти на админ роут
+  if (isAdminRoute && userRole !== 'admin') {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 

@@ -10,7 +10,8 @@ from bot.services.api_client import api_client
 from bot.utils.keyboards import (
     get_main_menu_keyboard,
     get_task_keyboard,
-    get_task_completed_keyboard
+    get_task_completed_keyboard,
+    get_skip_keyboard
 )
 from bot.utils.messages import Messages
 
@@ -157,8 +158,11 @@ async def handle_complete_task(update: Update, context: ContextTypes.DEFAULT_TYP
     # Сохраняем ID задания
     context.user_data["current_task_id"] = task_id
 
-    # Отправляем запрос на ответ
-    await query.message.reply_text(Messages.ASK_TASK_ANSWER)
+    # Отправляем запрос на ответ с кнопкой "Пропустить"
+    await query.message.reply_text(
+        Messages.ASK_TASK_ANSWER,
+        reply_markup=get_skip_keyboard()
+    )
 
     # Помечаем что ожидаем ответ (для ConversationHandler)
     context.user_data["awaiting_task_answer"] = True
@@ -235,6 +239,67 @@ async def handle_skip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     else:
         await query.edit_message_text(
+            Messages.ERROR_GENERAL,
+            reply_markup=get_main_menu_keyboard()
+        )
+
+    # Очищаем данные
+    context.user_data.pop("current_task_id", None)
+    context.user_data.pop("awaiting_task_answer", None)
+
+
+async def handle_task_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Обработчик текстовых сообщений когда ожидается ответ на задание.
+
+    Args:
+        update: Объект Update от Telegram
+        context: Контекст выполнения
+    """
+    # Проверяем, ожидаем ли мы ответ на задание
+    if not context.user_data.get("awaiting_task_answer"):
+        return
+
+    # Проверяем наличие токена
+    token = context.user_data.get("token")
+    task_id = context.user_data.get("current_task_id")
+
+    if not token or not task_id:
+        await update.message.reply_text(Messages.ERROR_GENERAL)
+        context.user_data.pop("awaiting_task_answer", None)
+        return
+
+    # Получаем ответ пользователя
+    answer_text = update.message.text.strip()
+
+    # Завершаем задание через API
+    result = await api_client.complete_task(
+        assignment_id=task_id,
+        answer_text=answer_text if answer_text else None,
+        token=token
+    )
+
+    if result:
+        # Задание успешно выполнено
+        # Получаем обновленную статистику
+        progress = await api_client.get_user_progress(token)
+
+        success_message = Messages.TASK_COMPLETED_SUCCESS
+
+        if progress:
+            success_message += f"\n\n{Messages.format_progress(progress)}"
+
+        await update.message.reply_text(
+            success_message,
+            reply_markup=get_task_completed_keyboard(),
+            parse_mode="HTML"
+        )
+
+        logger.info(f"Task {task_id} completed by user {update.effective_user.id}")
+
+    else:
+        # Ошибка при выполнении
+        await update.message.reply_text(
             Messages.ERROR_GENERAL,
             reply_markup=get_main_menu_keyboard()
         )

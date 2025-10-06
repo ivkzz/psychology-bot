@@ -67,7 +67,7 @@ export function Header() {
           })}
 
           {/* Админ-панель (только для админов) */}
-          {user?.role === 'ADMIN' && (
+          {user?.role === 'admin' && (
             <Link
               href="/admin"
               className={cn(
@@ -96,7 +96,7 @@ export function Header() {
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium">{user?.name}</p>
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
-                {user?.role === 'ADMIN' && (
+                {user?.role === 'admin' && (
                   <Badge variant="secondary" className="w-fit">
                     Администратор
                   </Badge>

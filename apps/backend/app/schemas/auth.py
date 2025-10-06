@@ -16,8 +16,9 @@ class TokenResponse(BaseModel):
 
 class LoginRequest(BaseModel):
     """Схема запроса на вход в систему."""
-    email: EmailStr = Field(..., description="Email адрес пользователя")
-    password: str = Field(..., min_length=6, description="Пароль пользователя")
+    email: Optional[EmailStr] = Field(None, description="Email адрес пользователя")
+    password: Optional[str] = Field(None, min_length=6, description="Пароль пользователя")
+    telegram_id: Optional[int] = Field(None, description="Telegram ID для входа из бота")
 
 
 class RegisterRequest(BaseModel):
