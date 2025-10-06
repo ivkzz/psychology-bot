@@ -575,15 +575,15 @@ export interface PaginatedResponse<T> {
 8. ✅ Middleware для защиты роутов (проверка токенов)
 9. ⏸️ Docker конфигурация (Dockerfile + docker-compose.yml) - ОТЛОЖЕНО
 
-### Sprint 2 (5-7 дней): Пользовательский кабинет
-1. Layout (Header с навигацией, Footer)
-2. Dashboard страница с карточками
-3. Tasks страница (получение задания дня + выполнение)
-4. History страница (список заданий + пагинация)
-5. Stats страница (прогресс + графики recharts)
-6. Profile страница (просмотр + редактирование)
-7. Компоненты: TaskCard, CompleteTaskModal
-8. Toast уведомления (sonner)
+### Sprint 2 (5-7 дней): Пользовательский кабинет ✅ ЗАВЕРШЕН
+1. ✅ Layout (Header с навигацией, Footer)
+2. ✅ Dashboard страница с карточками
+3. ✅ Tasks страница (получение задания дня + выполнение)
+4. ✅ History страница (список заданий + пагинация)
+5. ✅ Stats страница (прогресс + статистика по категориям)
+6. ✅ Profile страница (просмотр + редактирование)
+7. ✅ Компоненты: TaskCard, CompleteTaskModal
+8. ✅ Toast уведомления (sonner) - уже настроено в Sprint 1
 
 ### Sprint 3 (5-7 дней): Админ-панель
 1. Middleware проверка роли admin

@@ -155,6 +155,16 @@ async def mark_as_completed(
     if not assignment:
         return None
 
+    # Проверяем, что задание еще не выполнено
+    if assignment.status == AssignmentStatus.COMPLETED:
+        # Если уже выполнено, просто возвращаем с заданием
+        result = await db.execute(
+            select(Assignment)
+            .options(selectinload(Assignment.task))
+            .where(Assignment.id == assignment.id)
+        )
+        return result.scalar_one()
+
     assignment.status = AssignmentStatus.COMPLETED
     assignment.completed_at = datetime.utcnow()
     if answer_text:

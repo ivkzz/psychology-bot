@@ -3,14 +3,14 @@
  */
 
 export enum TaskDifficulty {
-  EASY = 'EASY',
-  MEDIUM = 'MEDIUM',
-  HARD = 'HARD'
+  EASY = 'easy',
+  MEDIUM = 'medium',
+  HARD = 'hard'
 }
 
 export enum AssignmentStatus {
-  PENDING = 'PENDING',
-  COMPLETED = 'COMPLETED'
+  PENDING = 'pending',
+  COMPLETED = 'completed'
 }
 
 export interface Task {
