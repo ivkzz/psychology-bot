@@ -9,10 +9,11 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import {
   useAdminUserDetails,
+  useAdminUserProgress,
+  useAdminUserAssignments,
   useAssignTask,
   useTaskTemplates,
 } from '@/lib/hooks/use-admin'
-import { useUserProgress, useTaskHistory } from '@/lib/hooks/use-tasks'
 import {
   Card,
   CardContent,
@@ -54,9 +55,8 @@ export default function AdminUserDetailsPage() {
   const [selectedTaskId, setSelectedTaskId] = useState<string>('')
 
   const { data: user, isLoading: userLoading } = useAdminUserDetails(userId)
-  const { data: progress, isLoading: progressLoading } =
-    useUserProgress()
-  const { data: history, isLoading: historyLoading } = useTaskHistory({
+  const { data: progress, isLoading: progressLoading } = useAdminUserProgress(userId)
+  const { data: history, isLoading: historyLoading } = useAdminUserAssignments(userId, {
     limit: 100,
   })
   const { data: templates } = useTaskTemplates({ limit: 100 })

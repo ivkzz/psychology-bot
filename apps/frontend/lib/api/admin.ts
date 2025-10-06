@@ -10,6 +10,8 @@ import type {
   TaskUpdate,
   Assignment,
   TaskDifficulty,
+  UserProgress,
+  AssignmentStatus,
 } from '@/types'
 
 export const adminApi = {
@@ -34,6 +36,34 @@ export const adminApi = {
    */
   getUserById: async (userId: string): Promise<User> => {
     const response = await apiClient.get<User>(`/api/v1/admin/users/${userId}`)
+    return response.data
+  },
+
+  /**
+   * Получить статистику прогресса пользователя по ID
+   */
+  getUserProgress: async (userId: string): Promise<UserProgress> => {
+    const response = await apiClient.get<UserProgress>(
+      `/api/v1/admin/users/${userId}/progress`
+    )
+    return response.data
+  },
+
+  /**
+   * Получить список заданий пользователя по ID
+   */
+  getUserAssignments: async (
+    userId: string,
+    params?: {
+      skip?: number
+      limit?: number
+      status?: AssignmentStatus
+    }
+  ): Promise<Assignment[]> => {
+    const response = await apiClient.get<Assignment[]>(
+      `/api/v1/admin/users/${userId}/assignments`,
+      { params }
+    )
     return response.data
   },
 

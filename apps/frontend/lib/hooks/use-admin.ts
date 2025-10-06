@@ -37,6 +37,35 @@ export function useAdminUserDetails(userId: string) {
   })
 }
 
+/**
+ * Хук для получения статистики прогресса пользователя по ID
+ */
+export function useAdminUserProgress(userId: string) {
+  return useQuery({
+    queryKey: ['admin', 'users', userId, 'progress'],
+    queryFn: () => adminApi.getUserProgress(userId),
+    staleTime: 1 * 60 * 1000,
+  })
+}
+
+/**
+ * Хук для получения списка заданий пользователя по ID
+ */
+export function useAdminUserAssignments(
+  userId: string,
+  params?: {
+    skip?: number
+    limit?: number
+    status?: import('@/types').AssignmentStatus
+  }
+) {
+  return useQuery({
+    queryKey: ['admin', 'users', userId, 'assignments', params],
+    queryFn: () => adminApi.getUserAssignments(userId, params),
+    staleTime: 1 * 60 * 1000,
+  })
+}
+
 // ============ Шаблоны заданий ============
 
 export interface UseTaskTemplatesParams {
@@ -145,8 +174,16 @@ export function useAssignTask() {
       userId: string
       taskId: string
     }) => adminApi.assignTaskToUser(userId, taskId),
-    onSuccess: (assignment) => {
-      // Инвалидируем кеш заданий пользователя
+    onSuccess: (assignment, variables) => {
+      // Инвалидируем кеш заданий конкретного пользователя
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'users', variables.userId, 'assignments'],
+      })
+      // Инвалидируем прогресс пользователя
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'users', variables.userId, 'progress'],
+      })
+      // Инвалидируем общую историю (на случай если открыта страница истории)
       queryClient.invalidateQueries({
         queryKey: ['tasks', 'history'],
       })
