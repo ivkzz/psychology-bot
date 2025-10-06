@@ -61,28 +61,21 @@ echo Networks removed
 
 echo.
 echo ==========================================
-echo Step 5: Cleaning unused resources
-echo ==========================================
-docker system prune -f
-echo System cleaned
-
-echo.
-echo ==========================================
-echo Step 6: Building PRODUCTION images
+echo Step 5: Building PRODUCTION images
 echo ==========================================
 docker compose build --no-cache
 echo Production images built
 
 echo.
 echo ==========================================
-echo Step 7: Starting containers in PRODUCTION mode
+echo Step 6: Starting containers in PRODUCTION mode
 echo ==========================================
 docker compose up -d
 echo Containers started
 
 echo.
 echo ==========================================
-echo Step 8: Waiting for services
+echo Step 7: Waiting for services
 echo ==========================================
 echo Waiting for PostgreSQL...
 timeout /t 5 /nobreak >nul
@@ -95,7 +88,7 @@ timeout /t 3 /nobreak >nul
 
 echo.
 echo ==========================================
-echo Step 9: Checking status
+echo Step 8: Checking status
 echo ==========================================
 docker compose ps
 
